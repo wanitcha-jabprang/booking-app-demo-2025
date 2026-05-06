@@ -1,8 +1,11 @@
-# Use Node.js 20 Alpine for smaller image size
-FROM node:20-alpine
+# Use Node.js 20 Debian-based for better library compatibility
+FROM node:20-slim
 
 # Set working directory
 WORKDIR /app
+
+# Install netcat for database readiness check
+RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
@@ -16,11 +19,12 @@ COPY prisma/ ./prisma/
 # Generate Prisma client
 RUN npx prisma generate
 
-# Run database migrations
-RUN npx prisma migrate deploy
-
 # Copy source code
 COPY . .
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh ./
+RUN chmod +x ./docker-entrypoint.sh
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs
@@ -37,5 +41,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node healthcheck.js || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with entrypoint script
+ENTRYPOINT ["./docker-entrypoint.sh"]
