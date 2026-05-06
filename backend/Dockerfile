@@ -43,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application with entrypoint script
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["npm", "start"]
+#CMD ["npm", "start"]
