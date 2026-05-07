@@ -24,7 +24,7 @@ COPY . .
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh ./
-RUN sed -i 's/\r$//' ./docker-entrypoint.sh   # ← เพิ่มบรรทัดนี้
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
 # Create non-root user for security

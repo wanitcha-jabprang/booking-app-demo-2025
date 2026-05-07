@@ -10,11 +10,6 @@ done
 echo "Database is ready!"
 echo "Attempting to run Prisma migrations..."
 npx prisma db push --accept-data-loss
-#npx prisma migrate deploy || {
-#  echo "Prisma migrations failed, but continuing startup..."
-#  echo "You may need to run migrations manually:"
-#  echo "  docker compose exec backend npx prisma migrate deploy"
-#}
 
 echo "Starting application..."
 exec npm start
