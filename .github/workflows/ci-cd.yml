@@ -194,20 +194,24 @@ jobs:
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
 
-      - name: Wait for deployment (90s)
-        run: sleep 90
+      - name: Wait for Render deployment (180s)
+        run: sleep 180
 
       - name: Health check — Backend on Render
         run: |
-          for i in {1..6}; do
-            echo "Health check attempt $i/6..."
-            if curl -f "${{ secrets.RENDER_BACKEND_URL }}/api/rooms"; then
+          TIMEOUT=300
+          INTERVAL=10
+          ELAPSED=0
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            echo "Health check attempt... (${ELAPSED}/${TIMEOUT}s)"
+            if curl -f --connect-timeout 5 --max-time 10 "${{ secrets.RENDER_BACKEND_URL }}/api/rooms" > /dev/null 2>&1; then
               echo "✅ Render deployment successful!"
               exit 0
             fi
-            sleep 15
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
           done
-          echo "❌ Render health check failed after 6 attempts"
+          echo "❌ Render health check failed after ${TIMEOUT}s"
           exit 1
 
 
