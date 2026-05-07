@@ -102,6 +102,15 @@
           "name": "Create Room (Admin)",
           "event": [
             {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const suffix = Math.floor(Math.random() * 100000);",
+                  "pm.collectionVariables.set('roomSuffix', suffix);"
+                ]
+              }
+            },
+            {
               "listen": "test",
               "script": {
                 "exec": [
@@ -125,7 +134,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\": \"Deluxe Room 101\", \"roomType\": \"Deluxe\", \"description\": \"Deluxe room with premium amenities\", \"capacity\": 2, \"price\": 1500}"
+              "raw": "{\"name\": \"Deluxe Room {{roomSuffix}}\", \"roomType\": \"Deluxe-{{roomSuffix}}\", \"description\": \"Deluxe room with premium amenities\", \"capacity\": 2, \"price\": 1500}"
             },
             "url": "{{baseUrl}}/api/rooms"
           }

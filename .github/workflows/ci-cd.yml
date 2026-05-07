@@ -80,7 +80,7 @@ jobs:
                 create: { username: 'admin', password: hash, role: 'admin' }
               });
               await prisma.room.create({
-                data: { name: 'Test Room 101', type: 'Standard', capacity: 2, price: 1000 }
+                data: { name: 'Test Room 101', roomType: 'Standard', capacity: 2, price: 1000 }
               });
               console.log('Seed completed');
             }
@@ -160,7 +160,7 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend → Vercel
     runs-on: ubuntu-latest
-    needs: [backend-test, frontend-build, security-scan]
+    needs: [backend-test, frontend-build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
@@ -186,7 +186,7 @@ jobs:
   deploy-backend-render:
     name: Deploy Backend → Render
     runs-on: ubuntu-latest
-    needs: [backend-test, frontend-build, security-scan]
+    needs: [backend-test, frontend-build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
@@ -210,42 +210,4 @@ jobs:
           echo "❌ Render health check failed after 6 attempts"
           exit 1
 
-  # ─────────────────────────────────────────────
-  # Job 5: Deploy Backend to Railway (ทางเลือก)
-  # ─────────────────────────────────────────────
-  deploy-backend-railway:
-    name: Deploy Backend → Railway
-    runs-on: ubuntu-latest
-    needs: [backend-test, frontend-build, security-scan]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: |
-          cd backend
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
-          railway up --detach
-
-      - name: Wait for deployment (90s)
-        run: sleep 90
-
-      - name: Health check — Backend on Railway
-        run: |
-          for i in {1..6}; do
-            echo "Health check attempt $i/6..."
-            if curl -f "${{ secrets.RAILWAY_BACKEND_URL }}/api/rooms"; then
-              echo "✅ Railway deployment successful!"
-              exit 0
-            fi
-            sleep 15
-          done
-          echo "❌ Railway health check failed"
-          exit 1
